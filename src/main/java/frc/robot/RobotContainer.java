@@ -6,7 +6,9 @@
 
   import java.io.File;
 
-  import edu.wpi.first.math.MathUtil;
+import com.pathplanner.lib.auto.NamedCommands;
+
+import edu.wpi.first.math.MathUtil;
   import edu.wpi.first.math.geometry.Pose2d;
   import edu.wpi.first.math.geometry.Rotation2d;
   import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -15,18 +17,23 @@
   import edu.wpi.first.wpilibj.RobotBase;
   import edu.wpi.first.wpilibj2.command.Command;
   import edu.wpi.first.wpilibj2.command.Commands;
-  import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-  import frc.robot.Constants.OperatorConstants;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Constants.ElevatorConst;
+import frc.robot.Constants.OperatorConstants;
   import frc.robot.commands.swervedrive.auto.AimatCoralStation;
   import frc.robot.commands.swervedrive.auto.NetAlignment;
   import frc.robot.commands.swervedrive.auto.autoalignment;
-  import frc.robot.commands.swervedrive.auto.centeralignment;
+import frc.robot.commands.swervedrive.auto.backfeed;
+import frc.robot.commands.swervedrive.auto.backfeed2;
+import frc.robot.commands.swervedrive.auto.centeralignment;
   import frc.robot.commands.swervedrive.auto.centeralignmentx;
   import frc.robot.commands.upsystemCommands.AutoActuation;
   import frc.robot.commands.upsystemCommands.DelayedScore;
   import frc.robot.commands.upsystemCommands.HardScore;
   import frc.robot.commands.upsystemCommands.Score;
-  import frc.robot.subsystems.Elevator;
+import frc.robot.commands.upsystemCommands.intake;
+import frc.robot.subsystems.Elevator;
   import frc.robot.subsystems.Elevator.ElevatorStates;
   import frc.robot.subsystems.Wrist;
   import frc.robot.subsystems.Wrist.Wriststates;
@@ -70,7 +77,7 @@
       
     // The robot's subsystems and commands are defined here...
     public static final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
-                                                                                  "swerve/maxSwerve"));
+                                                                                  "swerve/falcon"));
 
     // private final ElevatorSubsystem elevator = new ElevatorSubsystem();
 
@@ -143,31 +150,31 @@
       configureBindings();
       DriverStation.silenceJoystickConnectionWarning(true);
 
-      motor1.setDefaultCommand(Commands.run(()-> motor1.setmotor(()-> 0), motor1));
-      // NamedCommands.registerCommand("leftalignment",new autoalignment(drivebase,ELEVATOR,0.51,-0.16));// 75 16
-      // NamedCommands.registerCommand("rightalignment",new autoalignment(drivebase,ELEVATOR,0.51,0.16));
-      // NamedCommands.registerCommand("l4", new AutoActuation(ELEVATOR, PIVOT, upsystemstates.l4).until(()-> ElevatorConst.getfinish() == 1));
-      // NamedCommands.registerCommand("underalgae", new AutoActuation(ELEVATOR, PIVOT, upsystemstates.underalgae).until(()-> ElevatorConst.getfinish() == 1));
+      // motor1.setDefaultCommand(Commands.run(()-> motor1.setmotor(()-> 0), motor1));
+      NamedCommands.registerCommand("leftalignment",new autoalignment(drivebase,ELEVATOR,0.51,-0.16));// 75 16
+      NamedCommands.registerCommand("rightalignment",new autoalignment(drivebase,ELEVATOR,0.51,0.16));
+      NamedCommands.registerCommand("l4", new AutoActuation(ELEVATOR, PIVOT, upsystemstates.l4).until(()-> ElevatorConst.getfinish() == 1));
+      NamedCommands.registerCommand("underalgae", new AutoActuation(ELEVATOR, PIVOT, upsystemstates.underalgae).until(()-> ElevatorConst.getfinish() == 1));
 
 
-      // NamedCommands.registerCommand("backfeed", new backfeed(drivebase));
-      // NamedCommands.registerCommand("backfeed2", new backfeed2(drivebase));
+      NamedCommands.registerCommand("backfeed", new backfeed(drivebase));
+      NamedCommands.registerCommand("backfeed2", new backfeed2(drivebase));
 
-      // NamedCommands.registerCommand("source", new AutoActuation(ELEVATOR, PIVOT, upsystemstates.source).withTimeout(1.3));
-      // NamedCommands.registerCommand("halfsource", new AutoActuation(ELEVATOR, PIVOT, upsystemstates.source).withTimeout(0.53));
+      NamedCommands.registerCommand("source", new AutoActuation(ELEVATOR, PIVOT, upsystemstates.source).withTimeout(1.3));
+      NamedCommands.registerCommand("halfsource", new AutoActuation(ELEVATOR, PIVOT, upsystemstates.source).withTimeout(0.53));
 
-      // NamedCommands.registerCommand("score",  new HardScore(CATCHER_LEFT, CATCHER_RIGHT).withTimeout(0.7));
-      // NamedCommands.registerCommand("score2",  new HardScore(CATCHER_LEFT, CATCHER_RIGHT).withTimeout(0.7));
+      NamedCommands.registerCommand("score",  new HardScore(CATCHER_LEFT, CATCHER_RIGHT).withTimeout(0.7));
+      NamedCommands.registerCommand("score2",  new HardScore(CATCHER_LEFT, CATCHER_RIGHT).withTimeout(0.7));
 
-      // // NamedCommands.registerCommand("intake",  new intake(CATCHER_LEFT, CATCHER_RIGHT).withTimeout(1.25));
-      // NamedCommands.registerCommand("intake",  new SequentialCommandGroup(new intake(CATCHER_LEFT, CATCHER_RIGHT).until(()-> CATCHER_RIGHT.hascoral()),
-      // new intake(CATCHER_LEFT, CATCHER_RIGHT).withTimeout(0.2)));
+      // NamedCommands.registerCommand("intake",  new intake(CATCHER_LEFT, CATCHER_RIGHT).withTimeout(1.25));
+      NamedCommands.registerCommand("intake",  new SequentialCommandGroup(new intake(CATCHER_LEFT, CATCHER_RIGHT).until(()-> CATCHER_RIGHT.hascoral()),
+      new intake(CATCHER_LEFT, CATCHER_RIGHT).withTimeout(0.2)));
 
-      // NamedCommands.registerCommand("catchalgae",  new SequentialCommandGroup(new intake(CATCHER_LEFT, CATCHER_RIGHT).withTimeout(4)));
+      NamedCommands.registerCommand("catchalgae",  new SequentialCommandGroup(new intake(CATCHER_LEFT, CATCHER_RIGHT).withTimeout(4)));
 
-      // NamedCommands.registerCommand("centeralignment",new autoalignment(drivebase,ELEVATOR,0.65,0));
+      NamedCommands.registerCommand("centeralignment",new autoalignment(drivebase,ELEVATOR,0.65,0));
 
-      // NamedCommands.registerCommand("1secondintake",  new intake(CATCHER_LEFT, CATCHER_RIGHT).withTimeout(.61));
+      NamedCommands.registerCommand("1secondintake",  new intake(CATCHER_LEFT, CATCHER_RIGHT).withTimeout(.61));
 
     }
   
@@ -266,8 +273,8 @@
 
 
 
-      //  return drivebase.getAutonomousCommand("left4");
-      return null;
+       return drivebase.getAutonomousCommand("left4");
+      // return null;
 
 
       //  return drivebase.getAutonomousCommand("center3");
